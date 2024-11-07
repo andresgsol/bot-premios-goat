@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import date
 from telegram import Update
 from telegram.constants import ReactionEmoji
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
@@ -10,12 +11,20 @@ logging.basicConfig(
 )
 
 async def goat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.set_message_reaction(chat_id=update.effective_chat.id, message_id=update.effective_message.id, reaction=ReactionEmoji.FIRE)
+    value = update.message.text.partition(' ')[2]
+    context.chat_data[len(context.chat_data) + 1] = value
+    await update.message.set_reaction(reaction = ReactionEmoji.FIRE)
+
+async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    candidatesText = ""
+    for key, value in context.chat_data.items():
+        candidatesText += f"\n{key}. {value}"
+    await update.message.reply_html("Los candidatos de hoy son:" + candidatesText)
 
 if __name__ == '__main__':
     application = ApplicationBuilder().token(os.environ['TELEGRAM_APITOKEN']).build()
     
-    start_handler = CommandHandler('goat', goat)
-    application.add_handler(start_handler)
+    application.add_handler(CommandHandler('goat', goat))
+    application.add_handler(CommandHandler('candidatos', candidates))
     
     application.run_polling()
