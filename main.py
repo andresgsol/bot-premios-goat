@@ -55,14 +55,16 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
-    context.bot.stop_poll(
-        context.job.chat_id,
-        context.chat_data['poll']
-    )
+    pollMessage = context.chat_data['poll']
+    context.bot.stop_poll(context.job.chat_id, pollMessage)
+
+    pollOptions = pollMessage.poll.options
+    max_votes = max(option['voter_count'] for option in pollOptions)
+    winners = [option['text'] for option in pollOptions if option['voter_count'] == max_votes]  
 
     message = await context.bot.send_message(
         context.job.chat_id,
-        'El premio GOAT de hoy va para:\n'
+        'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
     )
 
     context.chat_data['candidates'] = []
