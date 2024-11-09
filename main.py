@@ -1,6 +1,6 @@
 import os
 import logging
-from datetime import time, datetime, timezone, timedelta
+from datetime import time, timezone, timedelta
 from telegram import Update
 from telegram.constants import ReactionEmoji
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
@@ -41,7 +41,8 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
     message = await context.bot.send_poll(
         context.job.chat_id,
         "Goat de hoy?",
-        context.chat_data['candidates']
+        context.chat_data['candidates'],
+        is_anonymous=False
     )
 
     context.chat_data['poll'] = message
@@ -72,10 +73,6 @@ async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for candidate in context.chat_data['candidates']:
         candidatesString += '\n' + candidate
     await update.message.reply_html("Los candidatos de hoy son:" + candidatesString)
-
-
-async def giveAwards(context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=context.job.chat_id, text="And the winner is...")
 
 
 if __name__ == '__main__':
