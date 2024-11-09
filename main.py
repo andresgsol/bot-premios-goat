@@ -46,7 +46,8 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
     )
 
     context.chat_data['poll'] = message
-    
+    context.chat_data['candidates'] = []
+
     context.job_queue.run_once(
         stopPoll, 
         when=time(23, 59, tzinfo=timezone(timedelta(hours=1))),
@@ -66,8 +67,6 @@ async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
         context.job.chat_id,
         'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
     )
-
-    context.chat_data['candidates'] = []
 
 
 async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
