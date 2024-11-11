@@ -1,9 +1,14 @@
 import os
 import logging
-from datetime import time, timezone, timedelta
 from telegram import Update
 from telegram.constants import ReactionEmoji
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+
+app_env = os.getenv('ENV', 'dev')
+if app_env == 'prod':
+    import config_prod as config
+else:
+    import config_dev as config
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -30,7 +35,7 @@ async def schedulePoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     job_poll = context.job_queue.run_once(
         startPoll, 
-        when=time(22, 00, tzinfo=timezone(timedelta(hours=1))),
+        when=config.WHEN_START_POLL,
         chat_id=update.effective_chat.id
     )
 
@@ -48,7 +53,7 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
 
     context.job_queue.run_once(
         stopPoll, 
-        when=time(23, 59, tzinfo=timezone(timedelta(hours=1))),
+        when=config.WHEN_STOP_POLL,
         chat_id=context.job.chat_id
     )
 
@@ -59,13 +64,13 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
 
 async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
     pollMessage = context.chat_data['poll']
-    context.bot.stop_poll(context.job.chat_id, pollMessage)
+    await context.bot.stop_poll(context.job.chat_id, pollMessage)
 
     pollOptions = pollMessage.poll.options
     max_votes = max(option['voter_count'] for option in pollOptions)
     winners = [option['text'] for option in pollOptions if option['voter_count'] == max_votes]  
 
-    message = await context.bot.send_message(
+    await context.bot.send_message(
         context.job.chat_id,
         'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
     )
@@ -82,7 +87,7 @@ async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token(os.environ['TELEGRAM_APITOKEN']).build()
+    application = ApplicationBuilder().token(config.TOKEN).build()
     
     application.add_handler(CommandHandler('goat', goat))
     application.add_handler(CommandHandler('candidatos', candidates))
