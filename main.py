@@ -44,15 +44,17 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
         context.chat_data['candidates'],
         is_anonymous=False
     )
-
     context.chat_data['poll'] = message
-    context.chat_data['candidates'] = []
 
     context.job_queue.run_once(
         stopPoll, 
         when=time(23, 59, tzinfo=timezone(timedelta(hours=1))),
         chat_id=context.job.chat_id
     )
+
+    # cleanup
+    context.chat_data.pop('candidates')
+    context.chat_data.pop('job_poll')
 
 
 async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
@@ -67,6 +69,9 @@ async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
         context.job.chat_id,
         'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
     )
+
+    # cleanup
+    context.chat_data.pop('poll')
 
 
 async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
