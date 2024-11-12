@@ -64,9 +64,9 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
 
 async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
     pollMessage = context.chat_data['poll']
-    await context.bot.stop_poll(context.job.chat_id, pollMessage)
+    poll = await context.bot.stop_poll(context.job.chat_id, pollMessage.id)
 
-    pollOptions = pollMessage.poll.options
+    pollOptions = poll.options
     max_votes = max(option['voter_count'] for option in pollOptions)
     winners = [option['text'] for option in pollOptions if option['voter_count'] == max_votes]  
 
