@@ -20,10 +20,23 @@ async def goat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.chat_data['candidates'] = []
 
     value = update.message.text.partition(' ')[2]
+    if not await validateGoat(value, update, context):
+        return
+
     context.chat_data['candidates'].append(value)
 
     await update.message.set_reaction(reaction = ReactionEmoji.FIRE)
     await schedulePoll(update, context)
+
+
+async def validateGoat(value, update, context):
+    if len(value) < 1 or len(value) > 100:
+        await update.message.reply_text("Lo siento mi rey pero el texto debe tener entre 1 y 100 caracteres")
+        return False
+    if len(context.chat_data['candidates']) >= 10:
+        await update.message.reply_text("Lo siento mi rey pero el máximo de 10 candidatos ha sido alcanzado.")
+        return False
+    return True
 
 
 async def schedulePoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
