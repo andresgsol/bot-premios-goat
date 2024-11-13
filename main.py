@@ -83,10 +83,7 @@ async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
     max_votes = max(option['voter_count'] for option in pollOptions)
     winners = [option['text'] for option in pollOptions if option['voter_count'] == max_votes]  
 
-    await context.bot.send_message(
-        context.job.chat_id,
-        'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
-    )
+    await announceWinner(context, winners)
 
 
 async def announceWinner(context: ContextTypes.DEFAULT_TYPE, winners):
