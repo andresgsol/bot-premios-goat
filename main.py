@@ -18,15 +18,12 @@ logging.basicConfig(
 async def goat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'candidates' not in context.chat_data:
         context.chat_data['candidates'] = []
-    candidates = context.chat_data['candidates']
 
     value = update.message.text.partition(' ')[2]
-    candidates.append(value)
+    context.chat_data['candidates'].append(value)
 
     await update.message.set_reaction(reaction = ReactionEmoji.FIRE)
-
-    if len(candidates) > 1:
-        await schedulePoll(update, context)
+    await schedulePoll(update, context)
 
 
 async def schedulePoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -43,10 +40,17 @@ async def schedulePoll(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def startPoll(context: ContextTypes.DEFAULT_TYPE):
+    context.chat_data.pop('job_poll')
+    candidates = context.chat_data.pop('candidates')
+    
+    if len(candidates) == 1:
+        await announceWinner(context, candidates)
+        return
+
     message = await context.bot.send_poll(
         context.job.chat_id,
         "Goat de hoy?",
-        context.chat_data['candidates'],
+        candidates,
         is_anonymous=False
     )
     context.chat_data['poll'] = message
@@ -57,13 +61,9 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
         chat_id=context.job.chat_id
     )
 
-    # cleanup
-    context.chat_data.pop('candidates')
-    context.chat_data.pop('job_poll')
-
 
 async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
-    pollMessage = context.chat_data['poll']
+    pollMessage = context.chat_data.pop('poll')
     poll = await context.bot.stop_poll(context.job.chat_id, pollMessage.id)
 
     pollOptions = poll.options
@@ -75,8 +75,12 @@ async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
         'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
     )
 
-    # cleanup
-    context.chat_data.pop('poll')
+
+async def announceWinner(context: ContextTypes.DEFAULT_TYPE, winners):
+    await context.bot.send_message(
+        context.job.chat_id,
+        'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
+    )
 
 
 async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
