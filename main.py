@@ -84,10 +84,11 @@ async def announceWinner(context: ContextTypes.DEFAULT_TYPE, winners):
 
 
 async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    candidatesString = ""
-    for candidate in context.chat_data['candidates']:
-        candidatesString += '\n' + candidate
-    await update.message.reply_html("Los candidatos de hoy son:" + candidatesString)
+    candidates = context.chat_data['candidates']
+    await context.bot.send_message(
+        update.effective_chat.id,
+        'Los candidatos de hoy son:\n' + '\n'.join(candidates)
+    )
 
 
 if __name__ == '__main__':
