@@ -16,6 +16,7 @@ logging.basicConfig(
     level=logging.ERROR
 )
 
+
 async def goat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'candidates' not in context.chat_data:
         context.chat_data['candidates'] = []
@@ -35,7 +36,7 @@ async def validateGoat(value, update, context):
         await update.message.reply_text("Lo siento mi rey pero el texto debe tener entre 1 y 100 caracteres")
         return False
     if len(context.chat_data['candidates']) >= 10:
-        await update.message.reply_text("Lo siento mi rey pero el máximo de 10 candidatos ha sido alcanzado.")
+        await update.message.reply_text("Lo siento mi rey pero el máximo de 10 candidatos ha sido alcanzado")
         return False
     return True
 
@@ -63,7 +64,7 @@ async def startPoll(context: ContextTypes.DEFAULT_TYPE):
 
     message = await context.bot.send_poll(
         context.job.chat_id,
-        "Goat de hoy?",
+        "GOAT de hoy?",
         candidates,
         is_anonymous=False
     )
@@ -90,7 +91,8 @@ async def stopPoll(context: ContextTypes.DEFAULT_TYPE):
 async def announceWinner(context: ContextTypes.DEFAULT_TYPE, winners):
     await context.bot.send_message(
         context.job.chat_id,
-        'El premio GOAT de hoy va para:\n' + '\n'.join(winners)
+        'El premio GOAT de hoy va para:\n' + '\n'.join(
+            winners if len(winners) == 1 else map(lambda x: '- ' + x, winners))
     )
 
 
@@ -98,7 +100,7 @@ async def candidates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     candidates = context.chat_data['candidates']
     await context.bot.send_message(
         update.effective_chat.id,
-        'Los candidatos de hoy son:\n' + '\n'.join(candidates)
+        'Los candidatos de hoy son:\n' + '\n'.join(map(lambda x: '- ' + x, candidates))
     )
 
 
