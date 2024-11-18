@@ -1,5 +1,6 @@
 import os
 import logging
+import random
 from telegram import Update
 from telegram.constants import ReactionEmoji
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
@@ -25,7 +26,7 @@ async def goat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.chat_data['candidates'].append(value)
 
-    await update.message.set_reaction(reaction = ReactionEmoji.FIRE)
+    await update.message.set_reaction(reaction = random.choice(list(ReactionEmoji)))
     await schedulePoll(update, context)
 
 
